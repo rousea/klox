@@ -2,12 +2,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
-private var hadError = false
-
 private fun runFile(path: String) {
     val bytes = Files.readAllBytes(Paths.get(path))
-    run (String(bytes))
-    if (hadError) exitProcess(65)
+    val result = run (String(bytes))
+    if (result.isFailure) exitProcess(65)
 }
 
 private fun runPrompt() {
@@ -16,13 +14,25 @@ private fun runPrompt() {
         print("> ")
         val line = reader.readLine() ?: break
         run(line)
-        hadError = false
     }
 }
 
-private fun run(source: String) {
-    Scanner(source).scanTokens().forEach { token ->
-        println(token)
+private fun run(source: String): Result<Expr> {
+    val tokens = Scanner(source).scanTokens()
+    val expr = Parser(tokens).parse()
+
+    if (expr.isSuccess) {
+        println(AstPrinter().print(expr.getOrThrow()))
+    }
+
+    return expr
+}
+
+fun error(token: Token, msg: String) {
+    if (token.type == TokenType.EOF) {
+        report(token.line, "at end", msg)
+    } else {
+        report(token.line, "at '${token.lexeme}'", msg)
     }
 }
 
@@ -32,7 +42,6 @@ fun error(line: Int, msg: String) {
 
 fun report(line: Int, _where: String, msg: String) {
     System.err.println("[line $line] Error $_where: $msg")
-    hadError = true
 }
 
 fun main(args: Array<String>) {

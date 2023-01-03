@@ -2,10 +2,20 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
+private val interpreter = Interpreter()
+
+private enum class Result(val exitCode: Int) {
+    SUCCESS(0),
+    PARSE_ERROR(65),
+    RUNTIME_ERROR(70)
+}
+
 private fun runFile(path: String) {
     val bytes = Files.readAllBytes(Paths.get(path))
-    val result = run (String(bytes))
-    if (result.isFailure) exitProcess(65)
+    val result = run(String(bytes))
+    if (result != Result.SUCCESS) {
+        exitProcess(result.exitCode)
+    }
 }
 
 private fun runPrompt() {
@@ -17,15 +27,20 @@ private fun runPrompt() {
     }
 }
 
-private fun run(source: String): Result<Expr> {
+private fun run(source: String): Result {
     val tokens = Scanner(source).scanTokens()
     val expr = Parser(tokens).parse()
 
-    if (expr.isSuccess) {
-        println(AstPrinter().print(expr.getOrThrow()))
+    if (expr.isFailure) {
+        return Result.PARSE_ERROR
     }
 
-    return expr
+    val res = interpreter.interpret(expr.getOrThrow())
+    if (res.isFailure) {
+        return Result.RUNTIME_ERROR
+    }
+
+    return Result.SUCCESS
 }
 
 fun error(token: Token, msg: String) {
@@ -38,6 +53,10 @@ fun error(token: Token, msg: String) {
 
 fun error(line: Int, msg: String) {
     report(line, "", msg)
+}
+
+fun runtimeError(error: RuntimeError) {
+    System.err.println("${error.message}\n[line ${error.token.line}]")
 }
 
 fun report(line: Int, _where: String, msg: String) {

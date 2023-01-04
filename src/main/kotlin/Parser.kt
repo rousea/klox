@@ -4,15 +4,41 @@ class Parser(private val tokens: List<Token>) {
     private var current = 0
 
     fun parse(): Result<List<Stmt>> {
-        return try {
-            val list: MutableList<Stmt> = mutableListOf()
-            while (!isAtEnd()) {
-                list.add(statement())
+        val list: MutableList<Stmt> = mutableListOf()
+        while (!isAtEnd()) {
+            val r = declaration()
+            if (r.isSuccess) {
+                list.add(r.getOrThrow())
+            } else {
+                return Result.failure(r.exceptionOrNull()!!)
             }
-            Result.success(list)
-        } catch (e: Exception) {
+        }
+        return Result.success(list)
+    }
+
+    private fun declaration(): Result<Stmt> {
+        return try {
+            if (match(VAR)) {
+                Result.success(varDeclaration())
+            } else {
+                Result.success(statement())
+            }
+        } catch (e: ParseError) {
+            synchronize()
             Result.failure(e)
         }
+    }
+
+    private fun varDeclaration(): Stmt {
+        val name = consume(IDENTIFIER, "Expect variable name.")
+
+        var initializer: Expr? = null;
+        if (match(EQUAL)) {
+            initializer = expression()
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration.")
+        return Stmt.Var(name, initializer)
     }
 
     private fun expression() = equality()
@@ -73,6 +99,10 @@ class Parser(private val tokens: List<Token>) {
             return Expr.Literal(previous().literal)
         }
 
+        if (match(IDENTIFIER)) {
+            return Expr.Variable(previous())
+        }
+
         if (match(LEFT_PAREN)) {
             val expr = expression()
             consume(RIGHT_PAREN, "Expect ')' after expression.")
@@ -110,10 +140,12 @@ class Parser(private val tokens: List<Token>) {
         throw _error(peek(), msg)
     }
 
-    private fun _error(token: Token, msg: String): Exception {
+    private fun _error(token: Token, msg: String): ParseError {
         error(token, msg)
-        return RuntimeException()
+        return ParseError()
     }
+
+    private class ParseError() : RuntimeException()
 
     private fun synchronize() {
         advance()

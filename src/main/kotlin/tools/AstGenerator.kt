@@ -57,7 +57,8 @@ fun main(args: Array<String>) {
             "Binary   : left: Expr, operator: Token, right: Expr",
             "Grouping : expression: Expr",
             "Literal  : value: Any?",
-            "Unary    : operator: Token, right: Expr"
+            "Unary    : operator: Token, right: Expr",
+            "Variable : name: Token",
         )
     )
 
@@ -66,6 +67,7 @@ fun main(args: Array<String>) {
         outputDir, "Stmt", listOf(
             "Expression : expression: Expr",
             "Print      : expression: Expr",
+            "Var        : name: Token, initializer: Expr?",
         )
     )
 }

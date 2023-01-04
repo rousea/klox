@@ -19,6 +19,10 @@ class AstPrinter : Expr.Visitor<String> {
         return paren(expr.operator.lexeme, expr.right)
     }
 
+    override fun visitVariableExpr(expr: Expr.Variable): String {
+        TODO("Not yet implemented")
+    }
+
     private fun paren(name: String, vararg exprs: Expr): String {
         return exprs.joinToString(prefix = "($name ", separator = " ", postfix = ")") { expr ->
             expr.accept(this)

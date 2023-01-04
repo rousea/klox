@@ -1,4 +1,6 @@
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
+    private val environment = Environment()
+
     fun interpret(stmts: List<Stmt>): Result<Int> {
         return try {
             stmts.forEach { execute(it) }
@@ -26,6 +28,17 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
             else -> any.toString()
         }
+    }
+
+    override fun visitVarStmt(stmt: Stmt.Var) {
+        val value = stmt.initializer?.let { expr ->
+            evaluate(expr)
+        }
+        environment.define(stmt.name.lexeme, value)
+    }
+
+    override fun visitVariableExpr(expr: Expr.Variable): Any? {
+        return environment.get(expr.name)
     }
 
     override fun visitExpressionStmt(stmt: Stmt.Expression) {

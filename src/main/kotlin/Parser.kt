@@ -3,16 +3,39 @@ import TokenType.*
 class Parser(private val tokens: List<Token>) {
     private var current = 0
 
-    fun parse(): Result<Expr> {
+    fun parse(): Result<List<Stmt>> {
         return try {
-            val expr = expression()
-            Result.success(expr)
+            val list: MutableList<Stmt> = mutableListOf()
+            while (!isAtEnd()) {
+                list.add(statement())
+            }
+            Result.success(list)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     private fun expression() = equality()
+
+    private fun statement(): Stmt {
+        return if (match(PRINT)) {
+            printStatement()
+        } else {
+            expressionStatement()
+        }
+    }
+
+    private fun printStatement(): Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after value")
+        return Stmt.Print(value)
+    }
+
+    private fun expressionStatement(): Stmt {
+        val expr = expression()
+        consume(SEMICOLON, "Expect ';' after expression")
+        return Stmt.Expression(expr)
+    }
 
     private fun equality(): Expr {
         var expr = comparison()

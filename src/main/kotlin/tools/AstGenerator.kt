@@ -20,15 +20,13 @@ private fun PrintWriter.defineType(baseName: String, className: String, fields: 
 private fun defineAst(outputDir: String, baseName: String, types: List<String>) {
     File("$outputDir/$baseName.kt").printWriter().use { writer ->
         with(writer) {
-            println("interface Visitor<R> {")
+            println("sealed class $baseName {")
+            println("  interface Visitor<R> {")
             types.forEach { type ->
                 val typeName = type.split(":", limit = 2)[0].trim()
-                println("    fun visit$typeName$baseName(${baseName.lowercase()}: $baseName.$typeName): R")
+                println("    fun visit$typeName$baseName(${baseName.lowercase()}: $typeName): R")
             }
-            println("}")
-            println()
-
-            println("sealed class $baseName {")
+            println("  }")
 
             println("  abstract fun <R> accept(visitor: Visitor<R>): R")
 
@@ -53,12 +51,21 @@ fun main(args: Array<String>) {
 
     val outputDir = args[0]
 
+    // expressions
     defineAst(
         outputDir, "Expr", listOf(
             "Binary   : left: Expr, operator: Token, right: Expr",
             "Grouping : expression: Expr",
             "Literal  : value: Any?",
             "Unary    : operator: Token, right: Expr"
+        )
+    )
+
+    // statements
+    defineAst(
+        outputDir, "Stmt", listOf(
+            "Expression : expression: Expr",
+            "Print      : expression: Expr",
         )
     )
 }

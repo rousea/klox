@@ -1,11 +1,10 @@
-interface Visitor<R> {
-    fun visitBinaryExpr(expr: Expr.Binary): R
-    fun visitGroupingExpr(expr: Expr.Grouping): R
-    fun visitLiteralExpr(expr: Expr.Literal): R
-    fun visitUnaryExpr(expr: Expr.Unary): R
-}
-
 sealed class Expr {
+  interface Visitor<R> {
+    fun visitBinaryExpr(expr: Binary): R
+    fun visitGroupingExpr(expr: Grouping): R
+    fun visitLiteralExpr(expr: Literal): R
+    fun visitUnaryExpr(expr: Unary): R
+  }
   abstract fun <R> accept(visitor: Visitor<R>): R
   data class Binary(
     val left: Expr,

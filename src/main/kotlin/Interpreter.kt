@@ -1,13 +1,16 @@
-class Interpreter : Visitor<Any?> {
-    fun interpret(expr: Expr): Result<Int> {
+class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
+    fun interpret(stmts: List<Stmt>): Result<Int> {
         return try {
-            val value = evaluate(expr)
-            println(stringify(value))
+            stmts.forEach { execute(it) }
             Result.success(0)
         } catch (e: RuntimeError) {
             runtimeError(e)
             Result.failure(e)
         }
+    }
+
+    private fun execute(stmt: Stmt) {
+        stmt.accept(this)
     }
 
     private fun stringify(any: Any?): String {
@@ -23,6 +26,15 @@ class Interpreter : Visitor<Any?> {
 
             else -> any.toString()
         }
+    }
+
+    override fun visitExpressionStmt(stmt: Stmt.Expression) {
+        evaluate(stmt.expression)
+    }
+
+    override fun visitPrintStmt(stmt: Stmt.Print) {
+        val value = evaluate(stmt.expression)
+        println(stringify(value))
     }
 
     override fun visitBinaryExpr(expr: Expr.Binary): Any? {

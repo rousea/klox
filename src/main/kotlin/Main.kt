@@ -29,13 +29,13 @@ private fun runPrompt() {
 
 private fun run(source: String): Result {
     val tokens = Scanner(source).scanTokens()
-    val expr = Parser(tokens).parse()
+    val stmts = Parser(tokens).parse()
 
-    if (expr.isFailure) {
+    if (stmts.isFailure) {
         return Result.PARSE_ERROR
     }
 
-    val res = interpreter.interpret(expr.getOrThrow())
+    val res = interpreter.interpret(stmts.getOrThrow())
     if (res.isFailure) {
         return Result.RUNTIME_ERROR
     }

@@ -23,6 +23,10 @@ class AstPrinter : Expr.Visitor<String> {
         TODO("Not yet implemented")
     }
 
+    override fun visitAssignExpr(expr: Expr.Assign): String {
+        TODO("Not yet implemented")
+    }
+
     private fun paren(name: String, vararg exprs: Expr): String {
         return exprs.joinToString(prefix = "($name ", separator = " ", postfix = ")") { expr ->
             expr.accept(this)

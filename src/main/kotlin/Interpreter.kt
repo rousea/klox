@@ -1,5 +1,5 @@
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
-    private val environment = Environment()
+    private var environment = Environment()
 
     fun interpret(stmts: List<Stmt>): Result<Int> {
         return try {
@@ -27,6 +27,20 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
             }
 
             else -> any.toString()
+        }
+    }
+
+    override fun visitBlockStmt(stmt: Stmt.Block) {
+        executeBlock(stmt.statements, Environment((environment)))
+    }
+
+    private fun executeBlock(statements: List<Stmt>, env: Environment) {
+        val prev = environment
+        try {
+            environment = env
+            statements.forEach(this::execute)
+        } finally {
+            environment = prev
         }
     }
 

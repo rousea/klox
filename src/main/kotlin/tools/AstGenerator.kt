@@ -66,6 +66,7 @@ fun main(args: Array<String>) {
     // statements
     defineAst(
         outputDir, "Stmt", listOf(
+            "Block      : statements: List<Stmt>",
             "Expression : expression: Expr",
             "Print      : expression: Expr",
             "Var        : name: Token, initializer: Expr?",

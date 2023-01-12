@@ -78,6 +78,12 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         println(stringify(value))
     }
 
+    override fun visitWhileStmt(stmt: Stmt.While) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body)
+        }
+    }
+
     override fun visitBinaryExpr(expr: Expr.Binary): Any? {
         val left = evaluate(expr.left)
         val right = evaluate(expr.right)

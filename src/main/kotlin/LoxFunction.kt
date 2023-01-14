@@ -10,7 +10,11 @@ class LoxFunction(
             env.define(param.lexeme, arguments[i])
         }
 
-        interpreter.executeBlock(declaration.body, env)
+        try {
+            interpreter.executeBlock(declaration.body, env)
+        } catch (retVal: Return) {
+            return retVal.value
+        }
         return null
     }
 

@@ -96,6 +96,14 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         println(stringify(value))
     }
 
+    override fun visitReturnStmt(stmt: Stmt.Return) {
+        val value = stmt.value?.let {
+            evaluate(it)
+        }
+
+        throw Return(value)
+    }
+
     override fun visitWhileStmt(stmt: Stmt.While) {
         while (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body)

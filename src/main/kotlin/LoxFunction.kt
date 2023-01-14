@@ -1,10 +1,11 @@
 class LoxFunction(
-    private val declaration: Stmt.Function
+    private val declaration: Stmt.Function,
+    private val closure: Environment,
 ) : LoxCallable {
     override fun arity() = declaration.params.size
 
     override fun call(interpreter: Interpreter, arguments: List<Any>): Any? {
-        val env = Environment(interpreter.globals)
+        val env = Environment(closure)
 
         declaration.params.forEachIndexed { i, param ->
             env.define(param.lexeme, arguments[i])

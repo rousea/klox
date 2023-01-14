@@ -1,5 +1,18 @@
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
-    private var environment = Environment()
+    val globals = Environment()
+    private var environment = globals
+
+    init {
+        globals.define("clock", object : LoxCallable {
+            override fun arity() = 0
+
+            override fun call(interpreter: Interpreter, arguments: List<Any>): Any {
+                return System.currentTimeMillis() / 1000.0
+            }
+
+            override fun toString() = "<native fn>"
+        })
+    }
 
     fun interpret(stmts: List<Stmt>): Result<Int> {
         return try {
@@ -34,7 +47,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         executeBlock(stmt.statements, Environment((environment)))
     }
 
-    private fun executeBlock(statements: List<Stmt>, env: Environment) {
+    fun executeBlock(statements: List<Stmt>, env: Environment) {
         val prev = environment
         try {
             environment = env
@@ -63,6 +76,11 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
     override fun visitExpressionStmt(stmt: Stmt.Expression) {
         evaluate(stmt.expression)
+    }
+
+    override fun visitFunctionStmt(stmt: Stmt.Function) {
+        val function = LoxFunction(stmt)
+        environment.define(stmt.name.lexeme, function)
     }
 
     override fun visitIfStmt(stmt: Stmt.If) {
@@ -142,6 +160,20 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
             else -> null
         }
+    }
+
+    override fun visitCallExpr(expr: Expr.Call): Any? {
+        val callee = evaluate(expr.callee)
+
+        val arguments = expr.arguments.mapNotNull { evaluate(it) }
+
+        if (callee !is LoxCallable) {
+            throw RuntimeError(expr.paren, "Can only call functions and classes.")
+        } else if (arguments.size != callee.arity()) {
+            throw RuntimeError(expr.paren, "Expected ${callee.arity()} arguments but got ${arguments.size}.")
+        }
+
+        return callee.call(this, arguments)
     }
 
     private fun checkNumberOperand(operator: Token, operand: Any?) {

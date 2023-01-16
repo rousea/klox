@@ -58,6 +58,7 @@ class Resolver(
             val scope = scopes.peek()
             if (name.lexeme in scope) {
                 error(name, "Already contains a variable named '${name.lexeme}' in this scope.")
+                resolveError = true
             }
             scope[name.lexeme] = true
         }
@@ -98,6 +99,7 @@ class Resolver(
     override fun visitVariableExpr(expr: Expr.Variable) {
         if (scopes.isNotEmpty() && scopes.peek()[expr.name.lexeme] == false) {
             error(expr.name, "Can't read local variable in its initializer.")
+            resolveError = true
         }
 
         resolveLocal(expr, expr.name)
@@ -148,6 +150,7 @@ class Resolver(
     override fun visitReturnStmt(stmt: Stmt.Return) {
         if (currentFunction == FunctionType.NONE) {
             error(stmt.keyword, "Can't return from top-level code.")
+            resolveError = true
         }
         stmt.value?.let { resolve(it) }
     }

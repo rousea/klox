@@ -7,6 +7,7 @@ private val interpreter = Interpreter()
 private enum class Result(val exitCode: Int) {
     SUCCESS(0),
     PARSE_ERROR(65),
+    RESOLVE_ERROR(66),
     RUNTIME_ERROR(70)
 }
 
@@ -33,6 +34,12 @@ private fun run(source: String): Result {
 
     if (stmts.isFailure) {
         return Result.PARSE_ERROR
+    }
+
+    val resolver = Resolver(interpreter)
+    val resolverResult = resolver.resolve(stmts.getOrThrow())
+    if (resolverResult.isFailure) {
+        return Result.RESOLVE_ERROR
     }
 
     val res = interpreter.interpret(stmts.getOrThrow())

@@ -62,6 +62,7 @@ fun main(args: Array<String>) {
             "Literal  : value: Any?",
             "Logical  : left: Expr, operator: Token, right: Expr",
             "Set      : obj: Expr, name: Token, value: Expr",
+            "Super    : keyword: Token, method: Token",
             "This     : keyword: Token",
             "Unary    : operator: Token, right: Expr",
             "Variable : name: Token",
@@ -72,7 +73,7 @@ fun main(args: Array<String>) {
     defineAst(
         outputDir, "Stmt", listOf(
             "Block      : statements: List<Stmt>",
-            "Class      : name: Token, methods: List<Stmt.Function>",
+            "Class      : name: Token, superclass: Expr.Variable?, methods: List<Stmt.Function>",
             "Expression : expression: Expr",
             "Function   : name: Token, params: List<Token>, body: List<Stmt>",
             "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt?",

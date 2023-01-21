@@ -8,7 +8,7 @@ class Resolver(
     }
 
     private enum class ClassType {
-        NONE, CLASS
+        NONE, CLASS, SUBCLASS
     }
 
     // stack of scopes that marks variable as ready via declared vs defined
@@ -56,8 +56,7 @@ class Resolver(
             val scope = scopes.peek()
 
             if (name.lexeme in scope) {
-                error(name, "Already contains a variable named '${name.lexeme}' in this scope.")
-                resolveError = true
+                resolveError(name, "Already contains a variable named '${name.lexeme}' in this scope.")
             }
 
             scope[name.lexeme] = false
@@ -108,9 +107,19 @@ class Resolver(
         resolve(expr.obj)
     }
 
+    override fun visitSuperExpr(expr: Expr.Super) {
+        if (currentClass == ClassType.NONE) {
+            resolveError(expr.keyword, "Can't use 'super' outside a class.")
+        } else if (currentClass != ClassType.SUBCLASS) {
+            resolveError(expr.keyword, "Can't use 'super' in a class with no superclass.")
+        }
+
+        resolveLocal(expr, expr.keyword)
+    }
+
     override fun visitThisExpr(expr: Expr.This) {
         if (currentClass == ClassType.NONE) {
-            error(expr.keyword, "Can't use 'this' outside of a class")
+            resolveError(expr.keyword, "Can't use 'this' outside of a class")
             return
         }
         resolveLocal(expr, expr.keyword)
@@ -122,8 +131,7 @@ class Resolver(
 
     override fun visitVariableExpr(expr: Expr.Variable) {
         if (scopes.isNotEmpty() && scopes.peek()[expr.name.lexeme] == false) {
-            error(expr.name, "Can't read local variable in its initializer.")
-            resolveError = true
+            resolveError(expr.name, "Can't read local variable in its initializer.")
         }
 
         resolveLocal(expr, expr.name)
@@ -142,6 +150,20 @@ class Resolver(
         declare(stmt.name)
         define(stmt.name)
 
+        if (stmt.superclass != null && stmt.name.lexeme == stmt.superclass.name.lexeme) {
+            resolveError(stmt.superclass.name, "A class can't inherit from itself.")
+        }
+
+        if (stmt.superclass != null) {
+            currentClass = ClassType.SUBCLASS
+            resolve(stmt.superclass)
+        }
+
+        if (stmt.superclass != null) {
+            beginScope()
+            scopes.peek()["super"] = true
+        }
+
         beginScope()
         scopes.peek()["this"] = true
 
@@ -151,6 +173,10 @@ class Resolver(
         }
 
         endScope()
+
+        if (stmt.superclass != null) {
+            endScope()
+        }
 
         currentClass = enclosingClass
     }
@@ -193,12 +219,11 @@ class Resolver(
 
     override fun visitReturnStmt(stmt: Stmt.Return) {
         if (currentFunction == FunctionType.NONE) {
-            error(stmt.keyword, "Can't return from top-level code.")
-            resolveError = true
+            resolveError(stmt.keyword, "Can't return from top-level code.")
         }
         stmt.value?.let {
             if (currentFunction == FunctionType.INITIALIZER) {
-                error(stmt.keyword, "Can't return a value from an initializer.")
+                resolveError(stmt.keyword, "Can't return a value from an initializer.")
             }
             resolve(it)
         }
@@ -215,5 +240,10 @@ class Resolver(
     override fun visitWhileStmt(stmt: Stmt.While) {
         resolve(stmt.condition)
         resolve(stmt.body)
+    }
+
+    private fun resolveError(token: Token, msg: String) {
+        resolveError = true
+        error(token, msg)
     }
 }

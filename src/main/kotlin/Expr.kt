@@ -6,6 +6,7 @@ sealed class Expr {
     fun visitGetExpr(expr: Get): R
     fun visitGroupingExpr(expr: Grouping): R
     fun visitLiteralExpr(expr: Literal): R
+    fun visitTernaryExpr(expr: Ternary): R
     fun visitLogicalExpr(expr: Logical): R
     fun visitSetExpr(expr: Set): R
     fun visitSuperExpr(expr: Super): R
@@ -60,6 +61,15 @@ sealed class Expr {
   ): Expr() {
     override fun <R> accept(visitor: Visitor<R>): R {
       return visitor.visitLiteralExpr(this)
+    }
+  }
+  data class Ternary(
+    val condition: Expr,
+    val thenBranch: Expr,
+    val elseBranch: Expr,
+  ): Expr() {
+    override fun <R> accept(visitor: Visitor<R>): R {
+      return visitor.visitTernaryExpr(this)
     }
   }
   data class Logical(

@@ -60,6 +60,7 @@ fun main(args: Array<String>) {
             "Get      : obj: Expr, name: Token",
             "Grouping : expression: Expr",
             "Literal  : value: Any?",
+            "Ternary  : condition: Expr, thenBranch: Expr, elseBranch: Expr",
             "Logical  : left: Expr, operator: Token, right: Expr",
             "Set      : obj: Expr, name: Token, value: Expr",
             "Super    : keyword: Token, method: Token",

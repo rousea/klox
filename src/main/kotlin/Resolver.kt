@@ -117,6 +117,12 @@ class Resolver(
         resolveLocal(expr, expr.keyword)
     }
 
+    override fun visitTernaryExpr(expr: Expr.Ternary) {
+        resolve(expr.condition)
+        resolve(expr.thenBranch)
+        resolve(expr.elseBranch)
+    }
+
     override fun visitThisExpr(expr: Expr.This) {
         if (currentClass == ClassType.NONE) {
             resolveError(expr.keyword, "Can't use 'this' outside of a class")

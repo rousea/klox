@@ -240,6 +240,15 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visitTernaryExpr(expr: Expr.Ternary): Any? {
+        val res = evaluate(expr.condition)
+        return if (isTruthy(res)) {
+            evaluate(expr.thenBranch)
+        } else {
+            evaluate(expr.elseBranch)
+        }
+    }
+
     private fun checkNumberOperand(operator: Token, operand: Any?) {
         if (operand !is Double) {
             throw RuntimeError(operator, "Operand must be a number.")

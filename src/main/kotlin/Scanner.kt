@@ -49,6 +49,8 @@ class Scanner(private val source: String) {
             '+' -> addToken(PLUS)
             ';' -> addToken(SEMICOLON)
             '*' -> addToken(STAR)
+            '?' -> addToken(QUESTION)
+            ':' -> addToken(COLON)
             '!' -> if (match('=')) addToken(BANG_EQUALS) else addToken(BANG)
             '=' -> if (match('=')) addToken(EQUAL_EQUAL) else addToken(EQUAL)
             '<' -> if (match('=')) addToken(LESS_EQUAL) else addToken(LESS)

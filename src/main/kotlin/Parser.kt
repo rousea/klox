@@ -210,7 +210,7 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun assignment(): Expr {
-        val expr = or()
+        val expr = ternary()
 
         if (match(EQUAL)) {
             val equals = previous()
@@ -223,6 +223,19 @@ class Parser(private val tokens: List<Token>) {
             }
 
             error(equals, "Invalid assignment target.")
+        }
+
+        return expr
+    }
+
+    private fun ternary(): Expr {
+        var expr = or()
+
+        if (match(QUESTION)) {
+            val then = or()
+            consume(COLON, "Expect ':' after opening ternary '?'.")
+            val other = or()
+            expr = Expr.Ternary(expr, then, other)
         }
 
         return expr

@@ -1,5 +1,6 @@
 sealed class Expr {
   interface Visitor<R> {
+    fun visitCommaExpr(expr: Comma): R
     fun visitAssignExpr(expr: Assign): R
     fun visitBinaryExpr(expr: Binary): R
     fun visitCallExpr(expr: Call): R
@@ -15,6 +16,13 @@ sealed class Expr {
     fun visitVariableExpr(expr: Variable): R
   }
   abstract fun <R> accept(visitor: Visitor<R>): R
+  data class Comma(
+    val expressions: List<Expr>,
+  ): Expr() {
+    override fun <R> accept(visitor: Visitor<R>): R {
+      return visitor.visitCommaExpr(this)
+    }
+  }
   data class Assign(
     val name: Token,
     val value: Expr,

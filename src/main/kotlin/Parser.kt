@@ -86,7 +86,7 @@ class Parser(private val tokens: List<Token>) {
         return Stmt.Var(name, initializer)
     }
 
-    private fun expression() = assignment()
+    private fun expression() = comma()
 
     private fun statement(): Stmt {
         return if (match(FOR)) {
@@ -207,6 +207,22 @@ class Parser(private val tokens: List<Token>) {
 
         consume(RIGHT_BRACE, "Expect '}' after block.")
         return statements
+    }
+
+    private fun comma(): Expr {
+        var expr = assignment()
+
+        if (match(COMMA)) {
+            val list = mutableListOf<Expr>()
+            do {
+                expr = assignment()
+                list.add(expr)
+            } while (match(COMMA))
+
+            expr = Expr.Comma(list)
+        }
+
+        return expr
     }
 
     private fun assignment(): Expr {

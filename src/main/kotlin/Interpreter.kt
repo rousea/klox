@@ -240,6 +240,15 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visitCommaExpr(expr: Expr.Comma): Any? {
+        val exprs = expr.expressions
+        val last = exprs.last()
+        exprs.dropLast(1).forEach { e ->
+            evaluate(e)
+        }
+        return evaluate(last)
+    }
+
     override fun visitTernaryExpr(expr: Expr.Ternary): Any? {
         val res = evaluate(expr.condition)
         return if (isTruthy(res)) {

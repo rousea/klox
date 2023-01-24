@@ -54,6 +54,7 @@ fun main(args: Array<String>) {
     // expressions
     defineAst(
         outputDir, "Expr", listOf(
+            "Comma    : expressions: List<Expr>",
             "Assign   : name: Token, value: Expr",
             "Binary   : left: Expr, operator: Token, right: Expr",
             "Call     : callee: Expr, paren: Token, arguments: List<Expr>",

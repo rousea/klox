@@ -117,6 +117,12 @@ class Resolver(
         resolveLocal(expr, expr.keyword)
     }
 
+    override fun visitCommaExpr(expr: Expr.Comma) {
+        expr.expressions.forEach { e ->
+            resolve(e)
+        }
+    }
+
     override fun visitTernaryExpr(expr: Expr.Ternary) {
         resolve(expr.condition)
         resolve(expr.thenBranch)

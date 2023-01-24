@@ -1,0 +1,8 @@
+var a = 1;
+if (a > 1) {
+    print "greater than";
+} else {
+    print "less than or equal to";
+}
+
+print a > 1 ? "greater than" : "less than or equal to";

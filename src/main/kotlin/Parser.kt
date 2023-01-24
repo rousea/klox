@@ -341,7 +341,7 @@ class Parser(private val tokens: List<Token>) {
             return Expr.Grouping(expr)
         }
 
-        throw _error(peek(), "Expect expression.")
+        throw parseError(peek(), "Expect expression.")
     }
 
     private fun binary(operand: () -> Expr, vararg types: TokenType): Expr {
@@ -369,10 +369,10 @@ class Parser(private val tokens: List<Token>) {
 
     private fun consume(type: TokenType, msg: String): Token {
         if (check(type)) return advance()
-        throw _error(peek(), msg)
+        throw parseError(peek(), msg)
     }
 
-    private fun _error(token: Token, msg: String): ParseError {
+    private fun parseError(token: Token, msg: String): ParseError {
         error(token, msg)
         return ParseError()
     }

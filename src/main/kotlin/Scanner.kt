@@ -55,6 +55,7 @@ class Scanner(private val source: String) {
             '>' -> if (match('=')) addToken(GREATER_EQUAL) else addToken(GREATER)
             '/' -> {
                 if (match('/')) {
+                    // consume comment
                     while (peek() != '\n' && !isAtEnd()) advance()
                 } else if (match('*')) {
                     blockComment()

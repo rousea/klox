@@ -1,0 +1,9 @@
+// this is a comment, it has no effect
+
+/* this is also a comment. it too has no effect */
+
+/* even a mutli-
+   line comment has no effect */
+
+var a = 1;
+print a;
